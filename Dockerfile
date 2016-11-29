@@ -3,6 +3,7 @@
 #     CGO_ENABLED=0 go build -a -tags netgo
 #     docker build --rm=true -t plugins/drone-cache .
 
-FROM gliderlabs/alpine:3.1
+FROM alpine:3.4
 ADD drone-cache /bin/
 ENTRYPOINT ["/bin/drone-cache"]
+CMD ["s3"]
