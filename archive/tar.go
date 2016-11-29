@@ -5,11 +5,12 @@ package archive
 
 import (
 	"archive/tar"
-	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
+
+	log "github.com/Sirupsen/logrus"
 )
 
 type tarArchive struct{}
@@ -30,12 +31,10 @@ func (a *tarArchive) Pack(src string, w io.Writer) error {
 
 	// walk path
 	return filepath.Walk(src, func(file string, fi os.FileInfo, err error) error {
-
 		// return on any error
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Taring up %s\n", file)
 
 		// create a new dir/file header
 		header, err := tar.FileInfoHeader(fi, fi.Name())
@@ -45,6 +44,8 @@ func (a *tarArchive) Pack(src string, w io.Writer) error {
 
 		// update the name to correctly reflect the desired destination when untaring
 		header.Name = strings.TrimPrefix(strings.Replace(file, src, "", -1), string(filepath.Separator))
+
+		log.Infof("Adding file %s at %s", fi.Name(), header.Name)
 
 		// write the header
 		if err = tw.WriteHeader(header); err != nil {
@@ -95,8 +96,6 @@ func (a *tarArchive) Unpack(dst string, r io.Reader) error {
 
 		// the target location where the dir/file should be created
 		target := filepath.Join(dst, header.Name)
-
-		fmt.Printf("Target %s\n", target)
 
 		// the following switch could also be done using fi.Mode(), not sure if there
 		// a benefit of using one vs. the other.
