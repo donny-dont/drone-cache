@@ -50,7 +50,7 @@ func (a *tarArchive) Pack(src string, w io.Writer) error {
 		}
 
 		// update the name to correctly reflect the desired destination when untaring
-		header.Name = strings.TrimPrefix(strings.Replace(file, src, "", -1), string(filepath.Separator))
+		header.Name = strings.TrimPrefix(strings.Replace(file, src, "", 1), string(filepath.Separator))
 
 		log.Debugf("Adding file %s at %s", fi.Name(), header.Name)
 
