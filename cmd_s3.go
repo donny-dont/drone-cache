@@ -5,8 +5,7 @@ import (
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/drone-plugins/drone-cache/archive"
-	"github.com/drone-plugins/drone-cache/cache"
+	"github.com/drone-plugins/drone-cache/plugin"
 	"github.com/drone-plugins/drone-cache/storage"
 	"github.com/urfave/cli"
 )
@@ -78,12 +77,6 @@ func s3Plugin(c *cli.Context) error {
 	// Only log the warning severity or above.
 	log.SetLevel(log.DebugLevel)
 
-	plugin, err := NewPlugin(c)
-
-	if err != nil {
-		return err
-	}
-
 	opts, err := s3Options(c)
 
 	if err != nil {
@@ -91,7 +84,6 @@ func s3Plugin(c *cli.Context) error {
 	}
 
 	log.Infof("Using %s as the cache", opts.Endpoint)
-	log.Infof("Using %s", plugin.Path)
 
 	s, err := storage.NewS3Storage(opts)
 
@@ -99,19 +91,5 @@ func s3Plugin(c *cli.Context) error {
 		return err
 	}
 
-	a, err := archive.FromFilename("archive.tar")
-
-	if err != nil {
-		return err
-	}
-
-	b := cache.Build{
-		Owner:  "drone",
-		Repo:   "drone-cache",
-		Branch: "foo/bar",
-	}
-
-	err = cache.RestoreCache(b, s, a)
-
-	return err
+	return plugin.Exec(c, s)
 }
