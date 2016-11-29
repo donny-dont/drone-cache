@@ -15,6 +15,8 @@ const (
 	rebuildFlag  = "rebuild"
 	restoreFlag  = "restore"
 
+	debugFlag = "debug"
+
 	repoOwnerFlag    = "repo.owner"
 	repoNameFlag     = "repo.name"
 	commitBranchFlag = "commit.branch"
@@ -48,6 +50,12 @@ func PluginFlags() []cli.Flag {
 			EnvVar: "PLUGIN_RESTORE",
 		},
 
+		cli.BoolFlag{
+			Name:   debugFlag,
+			Usage:  "debug plugin output",
+			EnvVar: "PLUGIN_DEBUG",
+		},
+
 		// Build information
 
 		cli.StringFlag{
@@ -70,6 +78,10 @@ func PluginFlags() []cli.Flag {
 }
 
 func newPlugin(c *cli.Context) (*plugin, error) {
+	if c.GlobalBool(debugFlag) {
+		log.SetLevel(log.DebugLevel)
+	}
+
 	// Determine the mode for the plugin
 	rebuild := c.GlobalBool(rebuildFlag)
 	restore := c.GlobalBool(restoreFlag)

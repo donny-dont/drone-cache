@@ -74,9 +74,6 @@ func s3Options(c *cli.Context) (*storage.S3Options, error) {
 }
 
 func s3Plugin(c *cli.Context) error {
-	// Only log the warning severity or above.
-	log.SetLevel(log.DebugLevel)
-
 	opts, err := s3Options(c)
 
 	if err != nil {

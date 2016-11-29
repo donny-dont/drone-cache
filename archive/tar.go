@@ -36,8 +36,15 @@ func (a *tarArchive) Pack(src string, w io.Writer) error {
 			return err
 		}
 
+		var link string
+		if fi.Mode()&os.ModeSymlink == os.ModeSymlink {
+			if link, err = os.Readlink(file); err != nil {
+				return err
+			}
+		}
+
 		// create a new dir/file header
-		header, err := tar.FileInfoHeader(fi, fi.Name())
+		header, err := tar.FileInfoHeader(fi, link)
 		if err != nil {
 			return err
 		}
@@ -45,7 +52,7 @@ func (a *tarArchive) Pack(src string, w io.Writer) error {
 		// update the name to correctly reflect the desired destination when untaring
 		header.Name = strings.TrimPrefix(strings.Replace(file, src, "", -1), string(filepath.Separator))
 
-		log.Infof("Adding file %s at %s", fi.Name(), header.Name)
+		log.Debugf("Adding file %s at %s", fi.Name(), header.Name)
 
 		// write the header
 		if err = tw.WriteHeader(header); err != nil {
@@ -53,16 +60,16 @@ func (a *tarArchive) Pack(src string, w io.Writer) error {
 		}
 
 		// return on directories since there will be no content to tar
-		if fi.Mode().IsDir() {
+		if !fi.Mode().IsRegular() {
 			return nil
 		}
 
 		// open files for taring
 		f, err := os.Open(file)
-		defer f.Close()
 		if err != nil {
 			return err
 		}
+		defer f.Close()
 
 		// copy file data into tar writer
 		if _, err := io.Copy(tw, f); err != nil {
