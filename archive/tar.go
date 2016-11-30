@@ -30,54 +30,35 @@ func (a *tarArchive) Pack(src string, w io.Writer) error {
 	defer tw.Close()
 
 	// walk path
-	return filepath.Walk(src, func(file string, fi os.FileInfo, err error) error {
-		// return on any error
+	return filepath.Walk(src, func(path string, fi os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		header, err := tar.FileInfoHeader(fi, fi.Name())
 		if err != nil {
 			return err
 		}
 
-		var link string
-		if fi.Mode()&os.ModeSymlink == os.ModeSymlink {
-			if link, err = os.Readlink(file); err != nil {
-				return err
-			}
-		}
+		header.Name = strings.TrimPrefix(strings.TrimPrefix(filepath.ToSlash(path), src), "/")
 
-		// create a new dir/file header
-		header, err := tar.FileInfoHeader(fi, link)
-		if err != nil {
-			return err
-		}
-
-		// update the name to correctly reflect the desired destination when untaring
-		header.Name = strings.TrimPrefix(filepath.ToSlash(strings.TrimPrefix(file, src)), "/")
-		//header.Name = strings.TrimPrefix(strings.Replace(file, src, "", 1), string(filepath.Separator))
-
-		log.Debugf("Adding file %s at %s", fi.Name(), header.Name)
-
-		// write the header
 		if err = tw.WriteHeader(header); err != nil {
 			return err
 		}
 
-		// return on directories since there will be no content to tar
-		if !fi.Mode().IsRegular() {
+		if fi.IsDir() {
+			log.Debugf("Directory found at %s", path)
 			return nil
 		}
 
-		// open files for taring
-		f, err := os.Open(file)
+		log.Debugf("File found at %s", path)
+
+		file, err := os.Open(path)
 		if err != nil {
 			return err
 		}
-		defer f.Close()
-
-		// copy file data into tar writer
-		if _, err := io.Copy(tw, f); err != nil {
-			return err
-		}
-
-		return nil
+		defer file.Close()
+		_, err = io.Copy(tw, file)
+		return err
 	})
 }
 
