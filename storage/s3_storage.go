@@ -74,6 +74,8 @@ func (s *s3Storage) Get(p string, dst io.Writer) error {
 		return err
 	}
 
+	log.Infof("Copying object from the server")
+
 	numBytes, err := io.Copy(dst, object)
 
 	if err != nil {
@@ -88,6 +90,8 @@ func (s *s3Storage) Get(p string, dst io.Writer) error {
 func (s *s3Storage) Put(p string, src io.Reader) error {
 	bucket, key := splitBucket(p)
 
+	log.Infof("Uploading to bucket %s at %s", bucket, key)
+
 	if len(bucket) == 0 || len(key) == 0 {
 		return fmt.Errorf("Invalid path %s", p)
 	}
@@ -98,12 +102,12 @@ func (s *s3Storage) Put(p string, src io.Reader) error {
 		if err = s.client.MakeBucket(bucket, s.opts.Region); err != nil {
 			return err
 		}
-		log.Debugf("Bucket %s created", bucket)
+		log.Infof("Bucket %s created", bucket)
 	} else {
-		log.Debugf("Bucket %s already exists", bucket)
+		log.Infof("Bucket %s already exists", bucket)
 	}
 
-	log.Debugf("Putting file in %s at %s", bucket, key)
+	log.Infof("Putting file in %s at %s", bucket, key)
 
 	numBytes, err := s.client.PutObject(bucket, key, src, "application/tar")
 
@@ -124,7 +128,8 @@ func splitBucket(p string) (string, string) {
 	i := strings.Index(full, "/")
 
 	if i != -1 && len(full) != i+1 {
-		return full[0:i], full[i+1:]
+		// Bucket names need to be all lower case for the key it doesnt matter
+		return strings.ToLower(full[0:i]), full[i+1:]
 	}
 
 	return "", ""

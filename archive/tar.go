@@ -34,18 +34,27 @@ func (a *tarArchive) Pack(src string, w io.Writer) error {
 		if err != nil {
 			return err
 		}
+
+		var link string
+		if fi.Mode()&os.ModeSymlink == os.ModeSymlink {
+			if link, err = os.Readlink(path); err != nil {
+				return err
+			}
+			log.Infof("Symbolic link found at %s", link)
+		}
+
 		header, err := tar.FileInfoHeader(fi, fi.Name())
 		if err != nil {
 			return err
 		}
 
-		header.Name = strings.TrimPrefix(strings.TrimPrefix(filepath.ToSlash(path), src), "/")
+		header.Name = strings.TrimPrefix(filepath.ToSlash(path), "/")
 
 		if err = tw.WriteHeader(header); err != nil {
 			return err
 		}
 
-		if fi.IsDir() {
+		if !fi.Mode().IsRegular() {
 			log.Debugf("Directory found at %s", path)
 			return nil
 		}
@@ -95,6 +104,7 @@ func (a *tarArchive) Unpack(dst string, r io.Reader) error {
 
 		// if its a dir and it doesn't exist create it
 		case tar.TypeDir:
+			log.Debugf("Directory found at %s", target)
 			if _, err := os.Stat(target); err != nil {
 				if err := os.MkdirAll(target, 0755); err != nil {
 					return err
@@ -103,14 +113,19 @@ func (a *tarArchive) Unpack(dst string, r io.Reader) error {
 
 		// if it's a file create it
 		case tar.TypeReg:
+			log.Debugf("File found at %s", target)
 			f, err := os.OpenFile(target, os.O_CREATE|os.O_RDWR, os.FileMode(header.Mode))
 			if err != nil {
 				return err
 			}
-			defer f.Close()
 
 			// copy over contents
-			if _, err := io.Copy(f, tr); err != nil {
+			_, err = io.Copy(f, tr)
+
+			// Explicitly close otherwise too many files remain open
+			f.Close()
+
+			if err != nil {
 				return err
 			}
 		}

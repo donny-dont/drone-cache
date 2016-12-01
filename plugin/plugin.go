@@ -4,6 +4,8 @@ import (
 	"github.com/drone-plugins/drone-cache/cache"
 	"github.com/drone-plugins/drone-cache/storage"
 	"github.com/urfave/cli"
+
+	log "github.com/Sirupsen/logrus"
 )
 
 const (
@@ -27,10 +29,24 @@ func Exec(c *cli.Context, s storage.Storage) error {
 	path := p.Path + p.Filename
 
 	if p.Mode == rebuildMode {
-		return ca.Rebuild(p.Mount, path)
+		log.Infof("Rebuilding cache at %s", path)
+		err = ca.Rebuild(p.Mount, path)
+
+		if err == nil {
+			log.Infof("Cache rebuilt")
+		}
+
+		return err
 	}
 
-	return ca.Restore(path)
+	log.Infof("Restoring cache at %s", path)
+	err = ca.Restore(path)
+
+	if err == nil {
+		log.Info("Cache restored")
+	}
+
+	return err
 }
 
 type plugin struct {
