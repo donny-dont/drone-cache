@@ -31,12 +31,12 @@ func PluginFlags() []cli.Flag {
 		},
 		cli.StringFlag{
 			Name:   pathFlag,
-			Usage:  "path",
+			Usage:  "path to save cache file to remotely",
 			EnvVar: "PLUGIN_PATH",
 		},
 		cli.StringFlag{
 			Name:   "mount",
-			Usage:  "cache directories",
+			Usage:  "directories to cache",
 			EnvVar: "PLUGIN_MOUNT",
 		},
 		cli.BoolFlag{

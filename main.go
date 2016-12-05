@@ -19,6 +19,7 @@ func main() {
 	app.Flags = plugin.PluginFlags()
 	app.Commands = []cli.Command{
 		s3Cmd,
+		artifactoryCmd,
 	}
 
 	if err := app.Run(os.Args); err != nil {
