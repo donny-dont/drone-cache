@@ -25,14 +25,14 @@ func NewCache(s storage.Storage) (Cache, error) {
 	}, nil
 }
 
-func (c Cache) Rebuild(src string, dst string) error {
+func (c Cache) Rebuild(srcs []string, dst string) error {
 	a, err := archive.FromFilename(dst)
 
 	if err != nil {
 		return err
 	}
 
-	return rebuildCache(src, dst, c.s, a)
+	return rebuildCache(srcs, dst, c.s, a)
 }
 
 func (c Cache) Restore(src string) error {
@@ -56,7 +56,7 @@ func (c Cache) Restore(src string) error {
 func restoreCache(src string, s storage.Storage, a archive.Archive) error {
 	reader, writer := io.Pipe()
 
-	cw := make(chan error)
+	cw := make(chan error, 1)
 	defer close(cw)
 
 	go func() {
@@ -73,19 +73,19 @@ func restoreCache(src string, s storage.Storage, a archive.Archive) error {
 	return a.Unpack("", reader)
 }
 
-func rebuildCache(src string, dst string, s storage.Storage, a archive.Archive) error {
-	log.Infof("Rebuilding cache at $s to %s", src, dst)
+func rebuildCache(srcs []string, dst string, s storage.Storage, a archive.Archive) error {
+	log.Infof("Rebuilding cache at %s to %s", srcs, dst)
 
 	reader, writer := io.Pipe()
 	defer reader.Close()
 
-	cw := make(chan error)
+	cw := make(chan error, 1)
 	defer close(cw)
 
 	go func() {
 		defer writer.Close()
 
-		err := a.Pack(src, writer)
+		err := a.Pack(srcs, writer)
 
 		if err != nil {
 			cw <- err
