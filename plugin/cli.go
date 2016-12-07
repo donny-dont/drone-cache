@@ -3,7 +3,6 @@ package plugin
 import (
 	"errors"
 	"fmt"
-	"strings"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/urfave/cli"
