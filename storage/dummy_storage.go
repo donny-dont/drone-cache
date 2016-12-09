@@ -9,9 +9,9 @@ import (
 
 // S3Options contains configuration for the S3 connection.
 type DummyOptions struct {
-  Server   string
+	Server   string
 	Username string
-  Password string
+	Password string
 }
 
 type dummyStorage struct {
