@@ -85,14 +85,7 @@ func rebuildCache(srcs []string, dst string, s storage.Storage, a archive.Archiv
 	go func() {
 		defer writer.Close()
 
-		err := a.Pack(srcs, writer)
-
-		if err != nil {
-			cw <- err
-			return
-		} else {
-			cw <- nil
-		}
+		cw <- a.Pack(srcs, writer)
 	}()
 
 	err := s.Put(dst, reader)

@@ -93,14 +93,7 @@ func packIt(a Archive, srcs []string) (error, error) {
 	go func() {
 		defer writer.Close()
 
-		err := a.Pack(srcs, writer)
-
-		if err != nil {
-			cw <- err
-			return
-		} else {
-			cw <- nil
-		}
+		cw <- a.Pack(srcs, writer)
 	}()
 
 	_, err := ioutil.ReadAll(reader)
