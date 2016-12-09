@@ -112,25 +112,20 @@ func unpackIt(a Archive, src string) error {
 	f, err := os.Open(src)
 
 	if err != nil {
-		fmt.Printf("Failed to open file %s\n", src)
 		return err
 	}
 
 	go func() {
 		defer writer.Close()
 
-		fmt.Printf("Copying %s\n", src)
 		_, err = io.Copy(writer, f)
-		fmt.Printf("Finished copying %s\n", src)
 
 		if err != nil {
-			fmt.Printf("Copy error'd for %s\n", src)
 			cw <- err
 			return
 		}
 	}()
 
-	fmt.Printf("Unpacking %s\n", src)
 	return a.Unpack("/dev/null", reader)
 }
 
