@@ -90,8 +90,18 @@ func rebuildCache(srcs []string, dst string, s storage.Storage, a archive.Archiv
 		if err != nil {
 			cw <- err
 			return
+		} else {
+			cw <- nil
 		}
 	}()
 
-	return s.Put(dst, reader)
+	err := s.Put(dst, reader)
+
+	werr := <-cw
+
+	if werr != nil {
+		return werr
+	}
+
+	return err
 }
