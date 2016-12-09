@@ -63,11 +63,6 @@ func restoreCache(src string, s storage.Storage, a archive.Archive) error {
 		defer writer.Close()
 
 		cw <- s.Get(src, writer)
-
-		// if err != nil {
-		// 	cw <- err
-		// 	return
-		// }
 	}()
 
 	err := a.Unpack("", reader)

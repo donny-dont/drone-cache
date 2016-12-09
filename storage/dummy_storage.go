@@ -28,7 +28,6 @@ func NewDummyStorage(opts *DummyOptions) (Storage, error) {
 
 func (s *dummyStorage) Get(p string, dst io.Writer) error {
 	if _, err := os.Stat(p); err != nil {
-		log.Infof("%s does not exist", p)
 		return err
 	}
 
