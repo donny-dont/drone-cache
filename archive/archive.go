@@ -18,7 +18,7 @@ type Archive interface {
 // FromFilename determines the archive format to use based on the name.
 func FromFilename(name string) (Archive, error) {
 	if strings.HasSuffix(name, ".tar") {
-		return NewTarArchive(), nil
+		return NewTarArchive(&TarArchiveOptions{}), nil
 	}
 
 	return nil, fmt.Errorf("Unknown file format for archive %s", name)

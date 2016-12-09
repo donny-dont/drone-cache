@@ -6,6 +6,7 @@ package archive
 import (
 	"archive/tar"
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -13,11 +14,19 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
-type tarArchive struct{}
+type TarArchiveOptions struct {
+	DryRun bool
+}
+
+type tarArchive struct{
+	opts *TarArchiveOptions
+}
 
 // NewTarArchive creates an Archive that uses the .tar file format.
-func NewTarArchive() Archive {
-	return &tarArchive{}
+func NewTarArchive(opts *TarArchiveOptions) Archive {
+	return &tarArchive{
+		opts: opts,
+	}
 }
 
 func (a *tarArchive) Pack(srcs []string, w io.Writer) error {
@@ -109,6 +118,16 @@ func (a *tarArchive) Unpack(dst string, r io.Reader) error {
 		// the following switch could also be done using fi.Mode(), not sure if there
 		// a benefit of using one vs. the other.
 		// fi := header.FileInfo()
+
+		if a.opts.DryRun {
+			_, err = io.Copy(ioutil.Discard, tr)
+
+			if err != nil {
+				return err
+			}
+
+			return nil
+		}
 
 		// check the file type
 		switch header.Typeflag {
