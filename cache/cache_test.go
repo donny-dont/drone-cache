@@ -60,6 +60,44 @@ func TestCache(t *testing.T) {
 			g.Assert(err.Error()).Equal("stat mount1: no such file or directory")
 		})
 	})
+
+	g.Describe("Restore", func() {
+		g.It("Should restore with no errors", func() {
+			s, err := storage.NewDummyStorage(dummyOpts)
+			g.Assert(err == nil).IsTrue("failed to create storage")
+
+			c, err := NewCache(s)
+			g.Assert(err == nil).IsTrue("failed to create cache")
+
+			err = c.Restore("fixtures/test.tar")
+			if err != nil {
+				fmt.Printf("Received unexpected error: %s\n", err)
+			}
+			g.Assert(err == nil).IsTrue("failed to rebuild the cache")
+		})
+
+		g.It("Should not return error on missing file", func() {
+			s, err := storage.NewDummyStorage(dummyOpts)
+			g.Assert(err == nil).IsTrue("failed to create storage")
+
+			c, err := NewCache(s)
+			g.Assert(err == nil).IsTrue("failed to create cache")
+
+			err = c.Restore("fixtures/test2.tar")
+			g.Assert(err == nil).IsTrue("should not have returned error on missing file")
+		})
+
+		g.It("Should return error on unknown file format", func() {
+			s, err := storage.NewDummyStorage(dummyOpts)
+			g.Assert(err == nil).IsTrue("failed to create storage")
+
+			c, err := NewCache(s)
+			g.Assert(err == nil).IsTrue("failed to create cache")
+
+			err = c.Restore("fixtures/test2.ttt")
+			g.Assert(err != nil).IsTrue("failed to return filetype error")
+		})
+	})
 }
 
 var (

@@ -62,15 +62,22 @@ func restoreCache(src string, s storage.Storage, a archive.Archive) error {
 	go func() {
 		defer writer.Close()
 
-		err := s.Get(src, writer)
+		cw <- s.Get(src, writer)
 
-		if err != nil {
-			cw <- err
-			return
-		}
+		// if err != nil {
+		// 	cw <- err
+		// 	return
+		// }
 	}()
 
-	return a.Unpack("", reader)
+	err := a.Unpack("", reader)
+	werr := <-cw
+
+	if werr != nil {
+		return werr
+	}
+
+	return err
 }
 
 func rebuildCache(srcs []string, dst string, s storage.Storage, a archive.Archive) error {
@@ -89,7 +96,6 @@ func rebuildCache(srcs []string, dst string, s storage.Storage, a archive.Archiv
 	}()
 
 	err := s.Put(dst, reader)
-
 	werr := <-cw
 
 	if werr != nil {
