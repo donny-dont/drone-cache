@@ -14,14 +14,14 @@ func TestTarArchive(t *testing.T) {
 
 	g.Describe("NewTarArchive", func() {
 		g.It("Should return tarArchive", func() {
-			ta := NewTarArchive()
+			ta := NewTarArchive(&TarArchiveOptions{})
 			g.Assert(ta != nil).IsTrue("failed to create tarArchive")
 		})
 	})
 
 	g.Describe("Pack", func() {
 		g.It("Should return no error", func() {
-			ta := NewTarArchive()
+			ta := NewTarArchive(&TarArchiveOptions{})
 			g.Assert(ta != nil).IsTrue("failed to create tarArchive")
 
 			err, werr := packIt(ta, validMount)
@@ -37,7 +37,7 @@ func TestTarArchive(t *testing.T) {
 		})
 
 		g.It("Should return error if mount does not exist", func() {
-			ta := NewTarArchive()
+			ta := NewTarArchive(&TarArchiveOptions{})
 			g.Assert(ta != nil).IsTrue("failed to create tarArchive")
 
 			err, werr := packIt(ta, invalidMount)
@@ -48,23 +48,39 @@ func TestTarArchive(t *testing.T) {
 		})
 	})
 
-	// g.Describe("Unpack", func() {
-	// 	g.It("Should return no error", func() {
-	// 		ta := NewTarArchive()
-	// 		g.Assert(ta != nil).IsTrue("failed to create tarArchive")
-	//
-	// 		err := unpackIt(ta, validFile)
-	//
-	// 		if err != nil {
-	// 			fmt.Printf("Received unexpected err: %s\n", err)
-	// 		}
-	// 		g.Assert(err == nil).IsTrue("Failed to unpack")
-	// 		// if werr != nil {
-	// 		// 	fmt.Printf("Received unexpected error: %s\n", werr)
-	// 		// }
-	// 		// g.Assert(werr == nil).IsTrue("Failed to unpack")
-	// 	})
-	// })
+	g.Describe("Unpack", func() {
+		g.It("Should return no error", func() {
+			ta := NewTarArchive(&TarArchiveOptions{DryRun: true})
+			g.Assert(ta != nil).IsTrue("failed to create tarArchive")
+
+			err := unpackIt(ta, validFile)
+
+			if err != nil {
+				fmt.Printf("Received unexpected err: %s\n", err)
+			}
+			g.Assert(err == nil).IsTrue("Failed to unpack")
+		})
+
+		g.It("Should return error on invalid tarfile", func() {
+			ta := NewTarArchive(&TarArchiveOptions{DryRun: true})
+			g.Assert(ta != nil).IsTrue("failed to create tarArchive")
+
+			err := unpackIt(ta, invalidFile)
+
+			g.Assert(err != nil).IsTrue("Failed to return error")
+			g.Assert(err.Error()).Equal("unexpected EOF")
+		})
+
+		g.It("Should return error on missing file", func() {
+			ta := NewTarArchive(&TarArchiveOptions{DryRun: true})
+			g.Assert(ta != nil).IsTrue("failed to create tarArchive")
+
+			err := unpackIt(ta, missingFile)
+
+			g.Assert(err != nil).IsTrue("Failed to return error")
+			g.Assert(err.Error()).Equal("open fixtures/test2.tar: no such file or directory")
+		})
+	})
 }
 
 func packIt(a Archive, srcs []string) (error, error) {
@@ -137,5 +153,6 @@ var (
 	}
 
 	validFile = "fixtures/test.tar"
-	invalidFile = "fixtures/test2.tar"
+	invalidFile = "fixtures/bad.tar"
+	missingFile = "fixtures/test2.tar"
 )
