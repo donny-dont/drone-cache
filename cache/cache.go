@@ -19,7 +19,7 @@ type Cache struct {
 	s storage.Storage
 }
 
-func NewCache(s storage.Storage) (Cache, error) {
+func New(s storage.Storage) (Cache, error) {
 	return Cache{
 		s: s,
 	}, nil

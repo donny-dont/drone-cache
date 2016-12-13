@@ -8,29 +8,15 @@ import (
 	"github.com/urfave/cli"
 )
 
-const (
-	filenameFlag = "filename"
-	pathFlag     = "path"
-	mountFlag    = "mount"
-	rebuildFlag  = "rebuild"
-	restoreFlag  = "restore"
-
-	debugFlag = "debug"
-
-	repoOwnerFlag    = "repo.owner"
-	repoNameFlag     = "repo.name"
-	commitBranchFlag = "commit.branch"
-)
-
 func PluginFlags() []cli.Flag {
 	return []cli.Flag{
 		cli.StringFlag{
-			Name:   filenameFlag,
+			Name:   "filename",
 			Usage:  "Filename for the cache",
 			EnvVar: "PLUGIN_FILENAME",
 		},
 		cli.StringFlag{
-			Name:   pathFlag,
+			Name:   "path",
 			Usage:  "path",
 			EnvVar: "PLUGIN_PATH",
 		},
@@ -40,18 +26,18 @@ func PluginFlags() []cli.Flag {
 			EnvVar: "PLUGIN_MOUNT",
 		},
 		cli.BoolFlag{
-			Name:   rebuildFlag,
+			Name:   "rebuild",
 			Usage:  "rebuild the cache directories",
 			EnvVar: "PLUGIN_REBUILD",
 		},
 		cli.BoolFlag{
-			Name:   restoreFlag,
+			Name:   "restore",
 			Usage:  "restore the cache directories",
 			EnvVar: "PLUGIN_RESTORE",
 		},
 
 		cli.BoolFlag{
-			Name:   debugFlag,
+			Name:   "debug",
 			Usage:  "debug plugin output",
 			EnvVar: "PLUGIN_DEBUG",
 		},
@@ -59,17 +45,17 @@ func PluginFlags() []cli.Flag {
 		// Build information
 
 		cli.StringFlag{
-			Name:   repoOwnerFlag,
+			Name:   "repo.owner",
 			Usage:  "repository owner",
 			EnvVar: "DRONE_REPO_OWNER",
 		},
 		cli.StringFlag{
-			Name:   repoNameFlag,
+			Name:   "repo.name",
 			Usage:  "repository name",
 			EnvVar: "DRONE_REPO_NAME",
 		},
 		cli.StringFlag{
-			Name:   commitBranchFlag,
+			Name:   "commit.branch",
 			Value:  "master",
 			Usage:  "git commit branch",
 			EnvVar: "DRONE_COMMIT_BRANCH",
@@ -78,13 +64,13 @@ func PluginFlags() []cli.Flag {
 }
 
 func newPlugin(c *cli.Context) (*plugin, error) {
-	if c.GlobalBool(debugFlag) {
+	if c.GlobalBool("debug") {
 		log.SetLevel(log.DebugLevel)
 	}
 
 	// Determine the mode for the plugin
-	rebuild := c.GlobalBool(rebuildFlag)
-	restore := c.GlobalBool(restoreFlag)
+	rebuild := c.GlobalBool("rebuild")
+	restore := c.GlobalBool("restore")
 
 	if rebuild && restore {
 		return nil, errors.New("Cannot rebuild and restore the cache")
@@ -97,7 +83,7 @@ func newPlugin(c *cli.Context) (*plugin, error) {
 
 	if rebuild {
 		// Look for the mount points to rebuild
-		mount = c.GlobalStringSlice(mountFlag)
+		mount = c.GlobalStringSlice("mount")
 
 		if len(mount) == 0 {
 			return nil, errors.New("No mounts specified")
@@ -109,7 +95,7 @@ func newPlugin(c *cli.Context) (*plugin, error) {
 	}
 
 	// Get the path to place the cache files
-	path := c.GlobalString(pathFlag)
+	path := c.GlobalString("path")
 
 	// Defaults to <owner>/<repo>/<branch>/
 	if len(path) == 0 {
@@ -117,14 +103,14 @@ func newPlugin(c *cli.Context) (*plugin, error) {
 
 		path = fmt.Sprintf(
 			"/%s/%s/%s/",
-			c.GlobalString(repoOwnerFlag),
-			c.GlobalString(repoNameFlag),
-			c.GlobalString(commitBranchFlag),
+			c.GlobalString("repo.owner"),
+			c.GlobalString("repo.name"),
+			c.GlobalString("commit.branch"),
 		)
 	}
 
 	// Get the filename
-	filename := c.GlobalString(filenameFlag)
+	filename := c.GlobalString("filename")
 
 	if len(filename) == 0 {
 		log.Info("No filename specified. Creating default")

@@ -1,4 +1,4 @@
-package storage
+package dummy
 
 import (
 	"io"
@@ -6,21 +6,22 @@ import (
 	"os"
 
 	log "github.com/Sirupsen/logrus"
+	. "github.com/drone-plugins/drone-cache/storage"
 )
 
-// S3Options contains configuration for the S3 connection.
-type DummyOptions struct {
+// Options contains configuration for the S3 connection.
+type Options struct {
 	Server   string
 	Username string
 	Password string
 }
 
 type dummyStorage struct {
-	opts   *DummyOptions
+	opts   *Options
 }
 
-// NewS3Storage creates an implementation of Storage with S3 as the backend.
-func NewDummyStorage(opts *DummyOptions) (Storage, error) {
+// New creates an implementation of Storage with Dummy as the backend.
+func New(opts *Options) (Storage, error) {
 	return &dummyStorage{
 		opts:   opts,
 	}, nil
