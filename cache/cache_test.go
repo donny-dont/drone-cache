@@ -11,12 +11,12 @@ import (
 func TestCache(t *testing.T) {
 	g := Goblin(t)
 
-	g.Describe("NewCache", func() {
+	g.Describe("New", func() {
 		g.It("Should create new Cache", func() {
 			s, err := storage.NewDummyStorage(dummyOpts)
 			g.Assert(err == nil).IsTrue("failed to create storage")
 
-			_, err = NewCache(s)
+			_, err = New(s)
 			g.Assert(err == nil).IsTrue("failed to create cache")
 		})
 	})
@@ -26,7 +26,7 @@ func TestCache(t *testing.T) {
 			s, err := storage.NewDummyStorage(dummyOpts)
 			g.Assert(err == nil).IsTrue("failed to create storage")
 
-			c, err := NewCache(s)
+			c, err := New(s)
 			g.Assert(err == nil).IsTrue("failed to create cache")
 
 			err = c.Rebuild([]string{"fixtures/test.txt", "fixtures/subdir"}, "file.tar")
@@ -40,7 +40,7 @@ func TestCache(t *testing.T) {
 			s, err := storage.NewDummyStorage(dummyOpts)
 			g.Assert(err == nil).IsTrue("failed to create storage")
 
-			c, err := NewCache(s)
+			c, err := New(s)
 			g.Assert(err == nil).IsTrue("failed to create cache")
 
 			err = c.Rebuild([]string{"mount1", "mount2"}, "file.ttt")
@@ -52,7 +52,7 @@ func TestCache(t *testing.T) {
 			s, err := storage.NewDummyStorage(dummyOpts)
 			g.Assert(err == nil).IsTrue("failed to create storage")
 
-			c, err := NewCache(s)
+			c, err := New(s)
 			g.Assert(err == nil).IsTrue("failed to create cache")
 
 			err = c.Rebuild([]string{"mount1", "mount2"}, "file.tar")
@@ -66,7 +66,7 @@ func TestCache(t *testing.T) {
 			s, err := storage.NewDummyStorage(dummyOpts)
 			g.Assert(err == nil).IsTrue("failed to create storage")
 
-			c, err := NewCache(s)
+			c, err := New(s)
 			g.Assert(err == nil).IsTrue("failed to create cache")
 
 			err = c.Restore("fixtures/test.tar")
@@ -80,7 +80,7 @@ func TestCache(t *testing.T) {
 			s, err := storage.NewDummyStorage(dummyOpts)
 			g.Assert(err == nil).IsTrue("failed to create storage")
 
-			c, err := NewCache(s)
+			c, err := New(s)
 			g.Assert(err == nil).IsTrue("failed to create cache")
 
 			err = c.Restore("fixtures/test2.tar")
@@ -91,7 +91,7 @@ func TestCache(t *testing.T) {
 			s, err := storage.NewDummyStorage(dummyOpts)
 			g.Assert(err == nil).IsTrue("failed to create storage")
 
-			c, err := NewCache(s)
+			c, err := New(s)
 			g.Assert(err == nil).IsTrue("failed to create cache")
 
 			err = c.Restore("fixtures/test2.ttt")

@@ -20,7 +20,7 @@ func Exec(c *cli.Context, s storage.Storage) error {
 		return err
 	}
 
-	ca, err := cache.NewCache(s)
+	ca, err := cache.New(s)
 
 	if err != nil {
 		return err
