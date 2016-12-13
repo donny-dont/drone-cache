@@ -4,6 +4,7 @@ import (
 	"io"
 
 	"github.com/drone-plugins/drone-cache/archive"
+	"github.com/drone-plugins/drone-cache/archive/util"
 	"github.com/drone-plugins/drone-cache/storage"
 
 	log "github.com/Sirupsen/logrus"
@@ -26,7 +27,7 @@ func New(s storage.Storage) (Cache, error) {
 }
 
 func (c Cache) Rebuild(srcs []string, dst string) error {
-	a, err := archive.FromFilename(dst)
+	a, err := util.FromFilename(dst)
 
 	if err != nil {
 		return err
@@ -36,7 +37,7 @@ func (c Cache) Rebuild(srcs []string, dst string) error {
 }
 
 func (c Cache) Restore(src string) error {
-	a, err := archive.FromFilename(src)
+	a, err := util.FromFilename(src)
 
 	if err != nil {
 		return err
