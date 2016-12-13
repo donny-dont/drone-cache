@@ -1,4 +1,4 @@
-package archive
+package tar
 
 // special thanks to this medium article:
 // https://medium.com/@skdomino/taring-untaring-files-in-go-6b07cf56bc07
@@ -12,18 +12,20 @@ import (
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
+
+	. "github.com/drone-plugins/drone-cache/archive"
 )
 
-type TarArchiveOptions struct {
+type Options struct {
 	DryRun bool
 }
 
 type tarArchive struct{
-	opts *TarArchiveOptions
+	opts *Options
 }
 
 // NewTarArchive creates an Archive that uses the .tar file format.
-func NewTarArchive(opts *TarArchiveOptions) Archive {
+func New(opts *Options) Archive {
 	return &tarArchive{
 		opts: opts,
 	}

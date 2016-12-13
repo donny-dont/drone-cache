@@ -1,4 +1,4 @@
-package archive
+package tar
 
 import (
 	"fmt"
@@ -7,21 +7,23 @@ import (
 	"os"
 	"testing"
 	. "github.com/franela/goblin"
+
+	"github.com/drone-plugins/drone-cache/archive"
 )
 
 func TestTarArchive(t *testing.T) {
 	g := Goblin(t)
 
-	g.Describe("NewTarArchive", func() {
+	g.Describe("New", func() {
 		g.It("Should return tarArchive", func() {
-			ta := NewTarArchive(&TarArchiveOptions{})
+			ta := New(&Options{})
 			g.Assert(ta != nil).IsTrue("failed to create tarArchive")
 		})
 	})
 
 	g.Describe("Pack", func() {
 		g.It("Should return no error", func() {
-			ta := NewTarArchive(&TarArchiveOptions{})
+			ta := New(&Options{})
 			g.Assert(ta != nil).IsTrue("failed to create tarArchive")
 
 			err, werr := packIt(ta, validMount)
@@ -37,7 +39,7 @@ func TestTarArchive(t *testing.T) {
 		})
 
 		g.It("Should return error if mount does not exist", func() {
-			ta := NewTarArchive(&TarArchiveOptions{})
+			ta := New(&Options{})
 			g.Assert(ta != nil).IsTrue("failed to create tarArchive")
 
 			err, werr := packIt(ta, invalidMount)
@@ -50,7 +52,7 @@ func TestTarArchive(t *testing.T) {
 
 	g.Describe("Unpack", func() {
 		g.It("Should return no error", func() {
-			ta := NewTarArchive(&TarArchiveOptions{DryRun: true})
+			ta := New(&Options{DryRun: true})
 			g.Assert(ta != nil).IsTrue("failed to create tarArchive")
 
 			err := unpackIt(ta, validFile)
@@ -62,7 +64,7 @@ func TestTarArchive(t *testing.T) {
 		})
 
 		g.It("Should return error on invalid tarfile", func() {
-			ta := NewTarArchive(&TarArchiveOptions{DryRun: true})
+			ta := New(&Options{DryRun: true})
 			g.Assert(ta != nil).IsTrue("failed to create tarArchive")
 
 			err := unpackIt(ta, invalidFile)
@@ -72,7 +74,7 @@ func TestTarArchive(t *testing.T) {
 		})
 
 		g.It("Should return error on missing file", func() {
-			ta := NewTarArchive(&TarArchiveOptions{DryRun: true})
+			ta := New(&Options{DryRun: true})
 			g.Assert(ta != nil).IsTrue("failed to create tarArchive")
 
 			err := unpackIt(ta, missingFile)
@@ -83,7 +85,7 @@ func TestTarArchive(t *testing.T) {
 	})
 }
 
-func packIt(a Archive, srcs []string) (error, error) {
+func packIt(a archive.Archive, srcs []string) (error, error) {
 	reader, writer := io.Pipe()
 	defer reader.Close()
 
@@ -103,7 +105,7 @@ func packIt(a Archive, srcs []string) (error, error) {
 	return err, werr
 }
 
-func unpackIt(a Archive, src string) error {
+func unpackIt(a archive.Archive, src string) error {
 	reader, writer := io.Pipe()
 
 	cw := make(chan error, 1)
