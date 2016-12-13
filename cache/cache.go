@@ -30,7 +30,7 @@ func (c Cache) Rebuild(srcs []string, dst string) error {
 	return rebuildCache(srcs, dst, c.s, a)
 }
 
-func (c Cache) Restore(src string) error {
+func (c Cache) Restore(src string, fallback string) error {
 	a, err := util.FromFilename(src)
 
 	if err != nil {
@@ -38,6 +38,11 @@ func (c Cache) Restore(src string) error {
 	}
 
 	err = restoreCache(src, c.s, a)
+
+	if err != nil && fallback != "" && fallback != src {
+		log.Warnf("Failed to retrieve %s, trying %s", src, fallback)
+		err = restoreCache(fallback, c.s, a)
+	}
 
 	// Cache plugin should print an error but it should not return it
 	// this is so the build continues even if the cache cant be restored

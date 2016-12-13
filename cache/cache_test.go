@@ -69,7 +69,21 @@ func TestCache(t *testing.T) {
 			c, err := New(s)
 			g.Assert(err == nil).IsTrue("failed to create cache")
 
-			err = c.Restore("fixtures/test.tar")
+			err = c.Restore("fixtures/test.tar", "")
+			if err != nil {
+				fmt.Printf("Received unexpected error: %s\n", err)
+			}
+			g.Assert(err == nil).IsTrue("failed to rebuild the cache")
+		})
+
+		g.It("Should restore from fallback if path does not exist", func() {
+			s, err := dummy.New(dummyOpts)
+			g.Assert(err == nil).IsTrue("failed to create storage")
+
+			c, err := New(s)
+			g.Assert(err == nil).IsTrue("failed to create cache")
+
+			err = c.Restore("fixtures/test2.tar", "fixtures/test.tar")
 			if err != nil {
 				fmt.Printf("Received unexpected error: %s\n", err)
 			}
@@ -83,7 +97,7 @@ func TestCache(t *testing.T) {
 			c, err := New(s)
 			g.Assert(err == nil).IsTrue("failed to create cache")
 
-			err = c.Restore("fixtures/test2.tar")
+			err = c.Restore("fixtures/test2.tar", "")
 			g.Assert(err == nil).IsTrue("should not have returned error on missing file")
 		})
 
@@ -94,7 +108,7 @@ func TestCache(t *testing.T) {
 			c, err := New(s)
 			g.Assert(err == nil).IsTrue("failed to create cache")
 
-			err = c.Restore("fixtures/test2.ttt")
+			err = c.Restore("fixtures/test2.ttt", "")
 			g.Assert(err != nil).IsTrue("failed to return filetype error")
 		})
 	})
