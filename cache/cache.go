@@ -10,12 +10,6 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
-type Build struct {
-	Owner  string
-	Repo   string
-	Branch string
-}
-
 type Cache struct {
 	s storage.Storage
 }
