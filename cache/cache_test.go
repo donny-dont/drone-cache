@@ -5,7 +5,7 @@ import (
 	"testing"
 	. "github.com/franela/goblin"
 
-	"github.com/drone-plugins/drone-cache/storage"
+	"github.com/drone-plugins/drone-cache/storage/dummy"
 )
 
 func TestCache(t *testing.T) {
@@ -13,7 +13,7 @@ func TestCache(t *testing.T) {
 
 	g.Describe("New", func() {
 		g.It("Should create new Cache", func() {
-			s, err := storage.NewDummyStorage(dummyOpts)
+			s, err := dummy.New(dummyOpts)
 			g.Assert(err == nil).IsTrue("failed to create storage")
 
 			_, err = New(s)
@@ -23,7 +23,7 @@ func TestCache(t *testing.T) {
 
 	g.Describe("Rebuild", func() {
 		g.It("Should rebuild with no errors", func() {
-			s, err := storage.NewDummyStorage(dummyOpts)
+			s, err := dummy.New(dummyOpts)
 			g.Assert(err == nil).IsTrue("failed to create storage")
 
 			c, err := New(s)
@@ -37,7 +37,7 @@ func TestCache(t *testing.T) {
 		})
 
 		g.It("Should return error on failure", func() {
-			s, err := storage.NewDummyStorage(dummyOpts)
+			s, err := dummy.New(dummyOpts)
 			g.Assert(err == nil).IsTrue("failed to create storage")
 
 			c, err := New(s)
@@ -49,7 +49,7 @@ func TestCache(t *testing.T) {
 		})
 
 		g.It("Should return error from channel", func() {
-			s, err := storage.NewDummyStorage(dummyOpts)
+			s, err := dummy.New(dummyOpts)
 			g.Assert(err == nil).IsTrue("failed to create storage")
 
 			c, err := New(s)
@@ -63,7 +63,7 @@ func TestCache(t *testing.T) {
 
 	g.Describe("Restore", func() {
 		g.It("Should restore with no errors", func() {
-			s, err := storage.NewDummyStorage(dummyOpts)
+			s, err := dummy.New(dummyOpts)
 			g.Assert(err == nil).IsTrue("failed to create storage")
 
 			c, err := New(s)
@@ -77,7 +77,7 @@ func TestCache(t *testing.T) {
 		})
 
 		g.It("Should not return error on missing file", func() {
-			s, err := storage.NewDummyStorage(dummyOpts)
+			s, err := dummy.New(dummyOpts)
 			g.Assert(err == nil).IsTrue("failed to create storage")
 
 			c, err := New(s)
@@ -88,7 +88,7 @@ func TestCache(t *testing.T) {
 		})
 
 		g.It("Should return error on unknown file format", func() {
-			s, err := storage.NewDummyStorage(dummyOpts)
+			s, err := dummy.New(dummyOpts)
 			g.Assert(err == nil).IsTrue("failed to create storage")
 
 			c, err := New(s)
@@ -101,7 +101,7 @@ func TestCache(t *testing.T) {
 }
 
 var (
-	dummyOpts = &storage.DummyOptions{
+	dummyOpts = &dummy.Options{
 		Server:   "myserver.com",
 		Username: "johndoe",
 		Password: "supersecret",

@@ -6,7 +6,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/drone-plugins/drone-cache/plugin"
-	"github.com/drone-plugins/drone-cache/storage"
+	"github.com/drone-plugins/drone-cache/storage/s3"
 	"github.com/urfave/cli"
 )
 
@@ -33,7 +33,7 @@ var s3Cmd = cli.Command{
 	},
 }
 
-func s3Options(c *cli.Context) (*storage.S3Options, error) {
+func s3Options(c *cli.Context) (*s3.Options, error) {
 	// Get the endpoint
 	server := c.String("server")
 
@@ -65,7 +65,7 @@ func s3Options(c *cli.Context) (*storage.S3Options, error) {
 		return nil, fmt.Errorf("No access credentials provided")
 	}
 
-	return &storage.S3Options{
+	return &s3.Options{
 		Endpoint: endpoint,
 		Access:   access,
 		Secret:   secret,
@@ -82,7 +82,7 @@ func s3Plugin(c *cli.Context) error {
 
 	log.Infof("Using %s as the cache", opts.Endpoint)
 
-	s, err := storage.NewS3Storage(opts)
+	s, err := s3.New(opts)
 
 	if err != nil {
 		return err

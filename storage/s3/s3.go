@@ -1,4 +1,4 @@
-package storage
+package s3
 
 import (
 	"fmt"
@@ -7,10 +7,11 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/minio/minio-go"
+	. "github.com/drone-plugins/drone-cache/storage"
 )
 
-// S3Options contains configuration for the S3 connection.
-type S3Options struct {
+// Options contains configuration for the S3 connection.
+type Options struct {
 	Endpoint   string
 	Key        string
 	Secret     string
@@ -37,11 +38,11 @@ type S3Options struct {
 
 type s3Storage struct {
 	client *minio.Client
-	opts   *S3Options
+	opts   *Options
 }
 
 // NewS3Storage creates an implementation of Storage with S3 as the backend.
-func NewS3Storage(opts *S3Options) (Storage, error) {
+func New(opts *Options) (Storage, error) {
 	client, err := minio.New(opts.Endpoint, opts.Access, opts.Secret, opts.UseSSL)
 
 	if err != nil {
@@ -82,7 +83,7 @@ func (s *s3Storage) Get(p string, dst io.Writer) error {
 		return err
 	}
 
-	log.Infof("Downloaded %s from server", byteSize(numBytes))
+	log.Infof("Downloaded %s from server", ByteSize(numBytes))
 
 	return nil
 }
@@ -115,7 +116,7 @@ func (s *s3Storage) Put(p string, src io.Reader) error {
 		return err
 	}
 
-	log.Infof("Uploaded %s to server", byteSize(numBytes))
+	log.Infof("Uploaded %s to server", ByteSize(numBytes))
 
 	return nil
 }
