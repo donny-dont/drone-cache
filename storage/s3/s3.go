@@ -7,6 +7,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/minio/minio-go"
+	"github.com/dustin/go-humanize"
 	. "github.com/drone-plugins/drone-cache/storage"
 )
 
@@ -83,7 +84,7 @@ func (s *s3Storage) Get(p string, dst io.Writer) error {
 		return err
 	}
 
-	log.Infof("Downloaded %s from server", ByteSize(numBytes))
+	log.Infof("Downloaded %s from server", humanize.Bytes(uint64(numBytes)))
 
 	return nil
 }
@@ -116,7 +117,7 @@ func (s *s3Storage) Put(p string, src io.Reader) error {
 		return err
 	}
 
-	log.Infof("Uploaded %s to server", ByteSize(numBytes))
+	log.Infof("Uploaded %s to server", humanize.Bytes(uint64(numBytes)))
 
 	return nil
 }
