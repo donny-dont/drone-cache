@@ -2,106 +2,47 @@
 
 [![Build Status](http://beta.drone.io/api/badges/drone-plugins/drone-cache/status.svg)](http://beta.drone.io/drone-plugins/drone-cache)
 [![Coverage Status](https://aircover.co/badges/drone-plugins/drone-cache/coverage.svg)](https://aircover.co/drone-plugins/drone-cache)
-[![](https://badge.imagelayers.io/plugins/drone-cache:latest.svg)](https://imagelayers.io/?images=plugins/drone-cache:latest 'Get your own badge on imagelayers.io')
 
-Drone plugin to simply cache the build workspace. For the usage information and a listing of the available options please take a look at [the docs](DOCS.md).
+drone-cache is a Go client library for creating cache [plugins](http://readme.drone.io/0.5/plugins/).
 
-## Binary
+Download the package using `go get`:
 
-Build the binary using `make`:
-
-```
-make deps build
+```bash
+go get "github.com/drone-plugins/drone-cache"
 ```
 
-### Example
+Import the package:
 
-```sh
-./drone-cache <<EOF
-{
-    "repo": {
-        "clone_url": "git://github.com/drone/drone",
-        "owner": "drone",
-        "name": "drone",
-        "full_name": "drone/drone"
-    },
-    "system": {
-        "link_url": "https://beta.drone.io"
-    },
-    "build": {
-        "number": 22,
-        "status": "success",
-        "started_at": 1421029603,
-        "finished_at": 1421029813,
-        "message": "Update the Readme",
-        "author": "johnsmith",
-        "author_email": "john.smith@gmail.com"
-        "event": "push",
-        "branch": "master",
-        "commit": "436b7a6e2abaddfd35740527353e78a227ddcb2c",
-        "ref": "refs/heads/master"
-    },
-    "workspace": {
-        "root": "/drone/src",
-        "path": "/drone/src/github.com/drone/drone"
-    },
-    "vargs": {
-        "compression": "bzip2",
-        "mount": [
-            "dist",
-            "/drone/cache"
-        ]
-    }
+```Go
+import "github.com/drone-plugins/drone-cache/cache"
+```
+
+The drone-cache library provides an interface for a `Storage` backend. When creating a new backend the following interface needs to be filled in.
+
+```Go
+type Storage interface {
+	Get(p string, dst io.Writer) error
+	Put(p string, src io.Reader) error
 }
-EOF
 ```
 
-## Docker
+To create a `Cache` object using a `Storage` object:
 
-Build the container using `make`:
-
-```
-make deps docker
+```Go
+cache, err := cache.New(storage)
 ```
 
-### Example
+To rebuild the cache:
 
-```sh
-docker run -i plugins/drone-cache <<EOF
-{
-    "repo": {
-        "clone_url": "git://github.com/drone/drone",
-        "owner": "drone",
-        "name": "drone",
-        "full_name": "drone/drone"
-    },
-    "system": {
-        "link_url": "https://beta.drone.io"
-    },
-    "build": {
-        "number": 22,
-        "status": "success",
-        "started_at": 1421029603,
-        "finished_at": 1421029813,
-        "message": "Update the Readme",
-        "author": "johnsmith",
-        "author_email": "john.smith@gmail.com"
-        "event": "push",
-        "branch": "master",
-        "commit": "436b7a6e2abaddfd35740527353e78a227ddcb2c",
-        "ref": "refs/heads/master"
-    },
-    "workspace": {
-        "root": "/drone/src",
-        "path": "/drone/src/github.com/drone/drone"
-    },
-    "vargs": {
-        "compression": "bzip2",
-        "mount": [
-            "dist",
-            "/drone/cache"
-        ]
-    }
-}
-EOF
+```Go
+err := cache.Rebuild(src, dst) 
 ```
+
+To restore the cache:
+
+```Go
+err := cache.Restore(src)
+```
+
+The drone-cache library currently supports the following file formats for cache storage
+* .tar
