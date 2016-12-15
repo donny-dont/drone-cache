@@ -188,17 +188,7 @@ func createMountContent() {
 }
 
 func createFixtures() {
-	// Create directories if does not exist
-	if _, err := os.Stat("/tmp/fixtures/tarfiles"); os.IsNotExist(err) {
-		os.MkdirAll("/tmp/fixtures/tarfiles", os.FileMode(int(0755)))
-	}
-	if _, err := os.Stat("/tmp/fixtures/mounts/subdir"); os.IsNotExist(err) {
-		os.MkdirAll("/tmp/fixtures/mounts/subdir", os.FileMode(int(0755)))
-	}
-	if _, err := os.Stat("/tmp/extracted"); os.IsNotExist(err) {
-		os.MkdirAll("/tmp/extracted", os.FileMode(int(0755)))
-	}
-
+	createDirectories()
 	createBadTarfile()
 	createMountContent()
 }
@@ -206,6 +196,20 @@ func createFixtures() {
 func cleanFixtures() {
 	os.RemoveAll("/tmp/fixtures/")
 	os.RemoveAll("/tmp/extracted/")
+}
+
+func createDirectories() {
+	directories := []string{
+		"/tmp/fixtures/tarfiles",
+		"/tmp/fixtures/mounts/subdir",
+		"/tmp/extracted",
+	}
+
+	for _, directory := range directories {
+		if _, err := os.Stat(directory); os.IsNotExist(err) {
+			os.MkdirAll(directory, os.FileMode(int(0755)))
+		}
+	}
 }
 
 func exists(path string) bool {
