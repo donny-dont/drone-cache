@@ -87,6 +87,7 @@ func TestTarArchive(t *testing.T) {
 				g.Assert(exists("/tmp/extracted/test.txt")).IsTrue("failed to create test.txt")
 				g.Assert(exists("/tmp/extracted/subdir")).IsTrue("failed to create subdir")
 				g.Assert(exists("/tmp/extracted/subdir/test2.txt")).IsTrue("failed to create subdir/test2.txt")
+				g.Assert(exists("/tmp/extracted/subdir/linkto_test.txt")).IsTrue("failed to create subdir/linkto_test.txt")
 			})
 
 			g.It("Should create files with correct content", func() {
@@ -97,6 +98,10 @@ func TestTarArchive(t *testing.T) {
 					g.Assert(err == nil).IsTrue("failed to read" + element.Path)
 					g.Assert(string(content)).Equal(element.Content)
 				}
+
+				content, err = ioutil.ReadFile("/tmp/extracted/subdir/linkto_test.txt")
+				g.Assert(err == nil).IsTrue("failed to read /tmp/extracted/subdir/linkto_test.txt")
+				g.Assert(string(content)).Equal("hello\ngo\n")
 			})
 
 			g.It("Should return error on invalid tarfile", func() {
@@ -178,6 +183,7 @@ func createBadTarfile() {
 }
 
 func createMountContent() {
+	// Write files and their content
 	var err error
 	for _, element := range mountFiles {
 		err = ioutil.WriteFile("/tmp/fixtures/mounts/" + element.Path, []byte(element.Content), 0644)
@@ -185,6 +191,9 @@ func createMountContent() {
 			log.Fatalln(err)
 		}
 	}
+
+	// Create a symlink
+	os.Symlink("../test.txt", "/tmp/fixtures/mounts/subdir/linkto_test.txt")
 }
 
 func createFixtures() {

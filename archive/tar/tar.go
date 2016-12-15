@@ -5,6 +5,7 @@ package tar
 
 import (
 	"archive/tar"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -40,17 +41,23 @@ func (a *tarArchive) Pack(srcs []string, w io.Writer) error {
 				return err
 			}
 
+			header, err := tar.FileInfoHeader(fi, fi.Name())
+			if err != nil {
+				return err
+			}
+
 			var link string
 			if fi.Mode()&os.ModeSymlink == os.ModeSymlink {
 				if link, err = os.Readlink(path); err != nil {
 					return err
 				}
-				log.Infof("Symbolic link found at %s", link)
-			}
+				log.Infof("Symbolic link found at %s to %s", path, link)
 
-			header, err := tar.FileInfoHeader(fi, fi.Name())
-			if err != nil {
-				return err
+				// Rewrite header for SymLink
+				header, err = tar.FileInfoHeader(fi, link)
+				if err != nil {
+					return err
+				}
 			}
 
 			header.Name = strings.TrimPrefix(filepath.ToSlash(path), "/")
@@ -114,6 +121,25 @@ func (a *tarArchive) Unpack(dst string, r io.Reader) error {
 
 		// check the file type
 		switch header.Typeflag {
+
+		// if its a symlink and it doesn't exist create it
+		case tar.TypeSymlink:
+			log.Debugf("Symlink found at %s", target)
+
+			// Check if something already exists
+			_, err := os.Stat(target)
+			if err == nil {
+				return fmt.Errorf("Failed to create symlink because file already exists at %s", target)
+			}
+
+			// Create the link
+			log.Infof("Creating link %s to %s", target, header.Linkname)
+			err = os.Symlink(header.Linkname, target)
+
+			if err != nil {
+				log.Infof("Failed creating link %s to %s", target, header.Linkname)
+				return err
+			}
 
 		// if its a dir and it doesn't exist create it
 		case tar.TypeDir:
