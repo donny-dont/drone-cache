@@ -8,8 +8,7 @@ pipeline:
     environment:
       - CGO_ENABLED=0
     commands:
-      - go get github.com/franela/goblin
-      - go get github.com/Sirupsen/logrus
+      - go get -t ./...
       - |
         for pkg in $(go list ./...)
         do

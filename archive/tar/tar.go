@@ -6,7 +6,6 @@ package tar
 import (
 	"archive/tar"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -16,19 +15,11 @@ import (
 	. "github.com/drone-plugins/drone-cache/archive"
 )
 
-type Options struct {
-	DryRun bool
-}
-
-type tarArchive struct{
-	opts *Options
-}
+type tarArchive struct{}
 
 // NewTarArchive creates an Archive that uses the .tar file format.
-func New(opts *Options) Archive {
-	return &tarArchive{
-		opts: opts,
-	}
+func New() Archive {
+	return &tarArchive{}
 }
 
 func (a *tarArchive) Pack(srcs []string, w io.Writer) error {
@@ -120,16 +111,6 @@ func (a *tarArchive) Unpack(dst string, r io.Reader) error {
 		// the following switch could also be done using fi.Mode(), not sure if there
 		// a benefit of using one vs. the other.
 		// fi := header.FileInfo()
-
-		if a.opts.DryRun {
-			_, err = io.Copy(ioutil.Discard, tr)
-
-			if err != nil {
-				return err
-			}
-
-			return nil
-		}
 
 		// check the file type
 		switch header.Typeflag {
