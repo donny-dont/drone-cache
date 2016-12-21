@@ -136,6 +136,11 @@ func TestCache(t *testing.T) {
 		})
 
 		g.Describe("Cleanup", func() {
+
+			g.BeforeEach(func() {
+				createCleanupContent()
+			})
+
 			g.It("Should find no files to cleanup", func() {
 				s, err := dummy.New(dummyOpts)
 				g.Assert(err == nil).IsTrue("failed to create storage")
@@ -143,27 +148,13 @@ func TestCache(t *testing.T) {
 				c, err := New(s)
 				g.Assert(err == nil).IsTrue("failed to create cache")
 
-				// Check files exist
-				var fileName string
-				for _, element := range proj1Files {
-					fileName = "/tmp/fixtures/cleanup/" + element.Path
-					_, err = os.Stat(fileName)
-					g.Assert(err == nil).IsTrue(fileName + " does not exist before cleanup")
-				}
-
 				c.Cleanup("fixtures/cleanup/proj1", time.Duration(20*24)*time.Hour)
 				g.Assert(err == nil).IsTrue("failed to cleanup nothing")
 
 				// Check expected files still exist
-				fileName = "/tmp/fixtures/cleanup/proj1/master/archive.txt"
-				_, err = os.Stat(fileName)
-				g.Assert(err == nil).IsTrue(fileName + " should still exist after cleanup")
-				fileName = "/tmp/fixtures/cleanup/proj1/oldtest/archive.txt"
-				_, err = os.Stat(fileName)
-				g.Assert(err == nil).IsTrue(fileName + " should still exist after cleanup")
-				fileName = "/tmp/fixtures/cleanup/proj1/newtest/archive.txt"
-				_, err = os.Stat(fileName)
-				g.Assert(err == nil).IsTrue(fileName + " should still exist after cleanup")
+				checkFileExists("/tmp/fixtures/cleanup/proj1/master/archive.txt", g)
+				checkFileExists("/tmp/fixtures/cleanup/proj1/oldtest/archive.txt", g)
+				checkFileExists("/tmp/fixtures/cleanup/proj1/newtest/archive.txt", g)
 			})
 
 			g.It("Should find some files to cleanup", func() {
@@ -173,44 +164,29 @@ func TestCache(t *testing.T) {
 				c, err := New(s)
 				g.Assert(err == nil).IsTrue("failed to create cache")
 
-				// Check files exist
-				var fileName string
-				for _, element := range proj1Files {
-					fileName = "/tmp/fixtures/cleanup/" + element.Path
-					_, err = os.Stat(fileName)
-					g.Assert(err == nil).IsTrue(fileName + " does not exist before cleanup")
-				}
-
 				// Perform Cleanup
 				c.Cleanup("fixtures/cleanup/proj1", time.Duration(9*24)*time.Hour)
 				g.Assert(err == nil).IsTrue("failed to cleanup nothing")
 
 				// Check expected files no longer exist
-				fileName = "/tmp/fixtures/cleanup/proj1/oldtest/archive.txt"
-				_, err = os.Stat(fileName)
-				g.Assert(err != nil).IsTrue("Failed to clean " + fileName)
+				checkFileRemoved("/tmp/fixtures/cleanup/proj1/oldtest/archive.txt", g)
 
 				// Check expected files still exist
-				fileName = "/tmp/fixtures/cleanup/proj1/master/archive.txt"
-				_, err = os.Stat(fileName)
-				g.Assert(err == nil).IsTrue(fileName + " should still exist after cleanup")
-				fileName = "/tmp/fixtures/cleanup/proj1/newtest/archive.txt"
-				_, err = os.Stat(fileName)
-				g.Assert(err == nil).IsTrue(fileName + " should still exist after cleanup")
-
-				// Check expected files still exist
-				fileName = "/tmp/fixtures/cleanup/proj2/master/archive.txt"
-				_, err = os.Stat(fileName)
-				g.Assert(err == nil).IsTrue(fileName + " should still exist after cleanup")
-				fileName = "/tmp/fixtures/cleanup/proj2/oldtest/archive.txt"
-				_, err = os.Stat(fileName)
-				g.Assert(err == nil).IsTrue(fileName + " should still exist after cleanup")
-				fileName = "/tmp/fixtures/cleanup/proj2/newtest/archive.txt"
-				_, err = os.Stat(fileName)
-				g.Assert(err == nil).IsTrue(fileName + " should still exist after cleanup")
+				checkFileExists("/tmp/fixtures/cleanup/proj1/master/archive.txt", g)
+				checkFileExists("/tmp/fixtures/cleanup/proj1/newtest/archive.txt", g)
 			})
 		})
 	})
+}
+
+func checkFileExists(fileName string, g *G) {
+	_, err := os.Stat(fileName)
+	g.Assert(err == nil).IsTrue(fileName + " should still exist")
+}
+
+func checkFileRemoved(fileName string, g *G) {
+	_, err := os.Stat(fileName)
+	g.Assert(err != nil).IsTrue("Failed to clean " + fileName)
 }
 
 func createFixtures() {
@@ -287,17 +263,9 @@ var (
 		{Path: "subdir/test2.txt", Content: "hello2\ngo\n"},
 	}
 
-	proj1Files = []testFile{
+	cleanupFiles = []testFile{
 		{Path: "proj1/master/archive.txt", Content: "hello\ngo\n", Time: time.Now()},
 		{Path: "proj1/newtest/archive.txt", Content: "hello2\ngo\n", Time: time.Now().AddDate(0, 0, -1)},
 		{Path: "proj1/oldtest/archive.txt", Content: "hello\ngo\n", Time: time.Now().AddDate(0, 0, -10)},
 	}
-
-	proj2Files = []testFile{
-		{Path: "proj2/master/archive.txt", Content: "hello\ngo\n", Time: time.Now()},
-		{Path: "proj2/newtest/archive.txt", Content: "hello2\ngo\n", Time: time.Now().AddDate(0, 0, -1)},
-		{Path: "proj2/oldtest/archive.txt", Content: "hello\ngo\n", Time: time.Now().AddDate(0, 0, -10)},
-	}
-
-	cleanupFiles = append(proj1Files, proj2Files...)
 )
